@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using TNET.Common.Utility;
 
-namespace TNET.VesselFetchBaseData.Models
+namespace Models
 {
     /// <summary> 
     /// 数据访问抽象基础类
