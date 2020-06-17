@@ -1126,7 +1126,11 @@ namespace Models
             }
             return flag;
         }
-
+        /// <summary>
+        /// Original
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <typeparam name="T"></typeparam>
         private static List<T> GetList<T>(DataTable dt)
         {
             List<T> result = new List<T>();
@@ -1149,6 +1153,46 @@ namespace Models
             return result;
         }
 
+        /// <summary>
+        /// Original by XF
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <typeparam name="T"></typeparam>
+        public static List<T> GetList<T>(System.Data.DataTable dt)
+            where T : new()
+        {
+            if (dt?.Rows == null || dt.Rows.Count == 0)
+                return null;
+
+            #region 建立对照关系
+            var columns = dt.Columns;
+            var properties = typeof(T).GetProperties();
+            var pros = new List<PropertyInfo>();
+            foreach (System.Data.DataColumn column in columns)
+            {
+                var pro = properties?.FirstOrDefault(p => string.Compare(p.Name, column.ColumnName, true) == 0);
+                if (pro == null
+                    // 类型是否一致或相互赋值
+                    || !column.DataType.Equals(pro.PropertyType)) continue;
+                pros.Add(pro);
+            }
+            if (!pros.Any()) return null;
+            #endregion
+
+            var result = new List<T>();
+            foreach (System.Data.DataRow row in dt.Rows)
+            {
+                var obj = new T();
+                foreach (var pro in pros)
+                {
+                    var value = row[pro.Name];
+                    if (value is DBNull) value = null;
+                    pro.SetValue(obj, value, null);
+                }
+                result.Add(obj);
+            }
+            return result;
+        }
 
         /// <summary>
         /// 执行查询语句，返回SqlDataReader ( 注意：调用该方法后，一定要对SqlDataReader进行Close )
