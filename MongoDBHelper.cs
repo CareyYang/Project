@@ -111,10 +111,24 @@ namespace Common
             return result;
         }
 
-        public UpdateResult Update(string field,string value,string filterfield, string id, string collectionName)
+        /// <summary>
+        /// 根据筛选条件更新单个字段
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="field">要更新的字段</param>
+        /// <param name="value">要更新的字段的值</param>
+        /// <param name="filter_field">筛选条件的字段</param>
+        /// <param name="filter_value">筛选条件的字段的值</param>
+        /// <param name="collectionName"></param>
+
+        public UpdateResult Update<T>(string field, string value, string filter_field, string filter_value, string collectionName = "")
         {
-            collection = db.GetCollection<T>(collectionName);
-            var filters =  Builders<T>.Filter.Eq(filterfield, id);
+            if (collectionName == "")
+            {
+                collectionName = typeof(T).Name;
+            }
+            var collection = _database.GetCollection<T>(collectionName);
+            var filters = Builders<T>.Filter.Eq(filter_field, filter_value);
             var update = Builders<T>.Update.Set(field, value);
             //var update = Builders<UpdateDefinition<T>>.Update.Combine(model).ToBsonDocument();
             UpdateResult result = collection.UpdateOne(filters, update);
