@@ -7,9 +7,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
-using TNET.Common.Utility;
 
-namespace Models
+namespace Common
 {
     /// <summary> 
     /// 数据访问抽象基础类
