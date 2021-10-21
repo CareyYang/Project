@@ -81,7 +81,26 @@ namespace Common
         /// 更新单条记录
         /// </summary>
         /// <param name="filter">lamda表达式</param>
-        /// <param name="model">新的Model</param>
+        /// <param name="model">新的Model的List类型</param>
+        /// <param name="collectionName">集合名称</param>
+        /// <param name="isInert">该值指示如果记录不存在是否进行插入操作 true：是 false：否</param>
+        public UpdateResult UpdateOne<T>(Expression<Func<T, bool>> filter, T model, string collectionName = "", bool isInert = false)
+        {
+            if (collectionName == "")
+            {
+                collectionName = typeof(T).Name;
+            }
+            var collection = _database.GetCollection<T>(collectionName);
+            var model_update = GetUpdateDefinition(model);
+            UpdateResult result = collection.UpdateOne(filter, model_update, new UpdateOptions() { IsUpsert = isInert });
+            return result;
+        }
+
+        /// <summary>
+        /// 更新单条记录
+        /// </summary>
+        /// <param name="filter">lamda表达式</param>
+        /// <param name="model">新的Model的UpdateDefinition类型</param>
         /// <param name="collectionName">集合名称</param>
         /// <param name="isInert">该值指示如果记录不存在是否进行插入操作 true：是 false：否</param>
         public UpdateResult UpdateOne(Expression<Func<T, bool>> filter, UpdateDefinition<T> model, string collectionName,bool isInert)
@@ -201,30 +220,30 @@ namespace Common
         }
 
         /// <summary>
-        /// 将一个类型为X的Model对象构造成UpdateDefinition<X>
+        /// 将一个类型为T的Model对象构造成UpdateDefinition<T>
         /// </summary>
-        /// <typeparam name="X">Model的类型</typeparam>
-        public UpdateDefinition<X> GetUpdateDefinition<X>(X model)
+        /// <typeparam name="T">Model的类型</typeparam>
+        public UpdateDefinition<T> GetUpdateDefinition<T>(T model)
         {
-            UpdateDefinition<X> updates;
-            var properties = typeof(X).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            List<UpdateDefinition<X>> udList = new List<UpdateDefinition<X>>();
+            UpdateDefinition<T> updates;
+            var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            List<UpdateDefinition<T>> udList = new List<UpdateDefinition<T>>();
             foreach (var item in properties)
             {
                 if (item.PropertyType.IsArray || typeof(IEnumerable).IsAssignableFrom(item.PropertyType))
                 {
                     var values = item.GetValue(model) as IList;
                     var fields = item.Name;
-                    udList.Add(Builders<X>.Update.Set(fields, values));
+                    udList.Add(Builders<T>.Update.Set(fields, values));
                 }
                 else
                 {
                     var values = item.GetValue(model);
                     var fields = item.Name;
-                    udList.Add(Builders<X>.Update.Set(fields, values));
+                    udList.Add(Builders<T>.Update.Set(fields, values));
                 }
             }
-            updates = new UpdateDefinitionBuilder<X>().Combine(udList);
+            updates = new UpdateDefinitionBuilder<T>().Combine(udList);
             return updates;
         }
     }
