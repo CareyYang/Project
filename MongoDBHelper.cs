@@ -103,11 +103,11 @@ namespace Common
         /// <param name="model">新的Model的UpdateDefinition类型</param>
         /// <param name="collectionName">集合名称</param>
         /// <param name="isInert">该值指示如果记录不存在是否进行插入操作 true：是 false：否</param>
-        public UpdateResult UpdateOne(Expression<Func<T, bool>> filter, UpdateDefinition<T> model, string collectionName,bool isInert)
+        public UpdateResult UpdateOne(Expression<Func<T, bool>> filter, UpdateDefinition<T> model, string collectionName, bool isInert)
         {
             collection = db.GetCollection<T>(collectionName);
 
-            UpdateResult result=collection.UpdateOne(filter, model, new UpdateOptions() { IsUpsert = isInert });
+            UpdateResult result = collection.UpdateOne(filter, model, new UpdateOptions() { IsUpsert = isInert });
             return result;
         }
 
